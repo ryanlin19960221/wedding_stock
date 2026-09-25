@@ -875,9 +875,15 @@ let animStartTime = null;
 let animStartStep = 0;
 let animTotalSteps = 0;
 let animRemainingDurationMs = 0;
+let modalTimerId = null;
 
 function startAnimation() {
   if (state.animation.isPlaying) return;
+
+  if (modalTimerId) {
+    clearTimeout(modalTimerId);
+    modalTimerId = null;
+  }
 
   state.animation.hasStarted = true;
   showPrePlayOverlay(false);
@@ -934,6 +940,10 @@ function pauseAnimation() {
 
 // Dedicated STOP Button Handler: Halts playback and resets curves
 function stopAnimation() {
+  if (modalTimerId) {
+    clearTimeout(modalTimerId);
+    modalTimerId = null;
+  }
   pauseAnimation();
   state.animation.hasStarted = false;
   state.animation.currentStep = 0;
@@ -957,6 +967,10 @@ function togglePlayPause() {
 }
 
 function replayAnimation() {
+  if (modalTimerId) {
+    clearTimeout(modalTimerId);
+    modalTimerId = null;
+  }
   pauseAnimation();
   state.animation.hasStarted = true;
   showPrePlayOverlay(false);
@@ -969,6 +983,10 @@ function replayAnimation() {
 }
 
 function seekToStep(step) {
+  if (modalTimerId) {
+    clearTimeout(modalTimerId);
+    modalTimerId = null;
+  }
   pauseAnimation();
   state.animation.hasStarted = step > 0;
   showPrePlayOverlay(!state.animation.hasStarted);
@@ -985,11 +1003,22 @@ function onStepAdvanced() {
   updateTopQuoteStripFromActiveStep();
 }
 
-// Triggered when animation reaches the end (Requirement: Center Results Modal)
+// Triggered when animation reaches the end
+// STRICT REQUIREMENT: "跑完動畫之後等2秒再出現結算頁面"
 function onAnimationFinished() {
   pauseAnimation();
   onStepAdvanced();
-  showFinalRankingModal();
+
+  if (modalTimerId) {
+    clearTimeout(modalTimerId);
+    modalTimerId = null;
+  }
+
+  // 等待 2 秒後再彈出結算視窗
+  modalTimerId = setTimeout(() => {
+    modalTimerId = null;
+    showFinalRankingModal();
+  }, 2000);
 }
 
 // Selectable Duration (5秒播完 vs 10秒播完)
@@ -1297,6 +1326,10 @@ function showFinalRankingModal() {
 }
 
 function hideFinalRankingModal() {
+  if (modalTimerId) {
+    clearTimeout(modalTimerId);
+    modalTimerId = null;
+  }
   const modal = document.getElementById('finalRankingModal');
   if (modal) modal.classList.add('hidden');
 }
