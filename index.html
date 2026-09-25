@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
     rel="stylesheet">
 
   <!-- FontAwesome Icons -->
@@ -33,9 +33,9 @@
     <header class="sz-sysbar">
       <div class="sz-sys-left">
         <span class="sz-brand-logo">抽捧花大作戰 💐</span>
-        <span class="sz-badge-tag" id="currentModeBadge">多股同台比價模式</span>
+        <span class="sz-badge-tag" id="currentModeBadge">多股比價</span>
         <span class="sz-sub-badge" id="strategyFilterBadge">
-          <i class="fa-solid fa-microchip"></i> 預設：半導體龍頭股與ETF (逆轉奪冠競速)
+          <i class="fa-solid fa-microchip"></i> 100元半導體對決
         </span>
         <span class="sz-api-status" id="apiStatusIndicator">
           <span class="dot-online"></span> Fugle API 正常
@@ -45,18 +45,18 @@
       <div class="sz-sys-right">
         <!-- View Mode Switch -->
         <div class="sz-mode-switch">
-          <button class="sz-btn-mode active" id="btnModeMulti" data-mode="multi">
-            <i class="fa-solid fa-layer-group"></i> 多股同台比價
+          <button class="sz-btn-mode active" id="btnModeMulti" data-mode="multi" title="多股同台比價">
+            <i class="fa-solid fa-layer-group"></i> 多股比價
           </button>
-          <button class="sz-btn-mode" id="btnModeSingle" data-mode="single">
-            <i class="fa-solid fa-chart-line"></i> 個股分時明細
+          <button class="sz-btn-mode" id="btnModeSingle" data-mode="single" title="個股分時明細">
+            <i class="fa-solid fa-chart-line"></i> 個股明細
           </button>
         </div>
 
         <!-- Fullscreen Button -->
-        <button id="btnFullscreenToggle" class="sz-btn-fullscreen" title="進入全螢幕播放走勢圖與右方表格">
+        <button id="btnFullscreenToggle" class="sz-btn-fullscreen" title="全螢幕播放">
           <i class="fa-solid fa-expand" id="fullscreenIcon"></i>
-          <span id="fullscreenText">全螢幕顯示</span>
+          <span id="fullscreenText">全螢幕</span>
         </button>
 
         <span class="sz-clock" id="liveClock">2026-09-25 21:00:00</span>
@@ -69,14 +69,14 @@
     <!-- Stock Selection Tabs Bar (Normal mode) -->
     <nav class="sz-stock-tabs-bar">
       <div class="sz-tabs-label">
-        <i class="fa-solid fa-microchip"></i> 半導體比價清單：
+        <i class="fa-solid fa-microchip"></i> 清單：
       </div>
       <div class="sz-tabs-scroll" id="stockTabsContainer">
         <!-- Dynamically injected tabs -->
       </div>
       <div class="sz-add-stock-box">
-        <input type="text" id="inputNewSymbol" placeholder="輸入代號 (如 2454)" maxlength="6">
-        <button id="btnAddStock" class="sz-btn-add"><i class="fa-solid fa-plus"></i> 加個股</button>
+        <input type="text" id="inputNewSymbol" placeholder="代號" maxlength="6">
+        <button id="btnAddStock" class="sz-btn-add"><i class="fa-solid fa-plus"></i> 新增</button>
       </div>
     </nav>
 
@@ -89,7 +89,7 @@
           <span class="sz-stock-market" id="quoteMarket">上市半導體</span>
         </div>
         <div class="sz-price-box">
-          <div class="sz-big-price text-up" id="quotePrice">112.0</div>
+          <div class="sz-big-price text-up" id="quotePrice">112.0元</div>
           <div class="sz-diff-box text-up" id="quoteDiffBox">
             <span class="sz-arrow" id="quoteArrow">▲</span>
             <span id="quoteChange">+22.3</span>
@@ -129,7 +129,7 @@
           <span class="sz-val" id="quoteAmp">3.00%</span>
         </div>
         <div class="sz-metric-item">
-          <span class="sz-lbl">時間點</span>
+          <span class="sz-lbl">時間</span>
           <span class="sz-val text-cyan" id="quoteTime">--:--:--</span>
         </div>
       </div>
@@ -139,28 +139,28 @@
     <section class="sz-ctrl-deck">
       <!-- Playback Controls -->
       <div class="sz-ctrl-playback">
-        <button id="btnPlay" class="sz-btn-play" title="播放走勢動畫 (多股同步由左至右繪製)">
+        <button id="btnPlay" class="sz-btn-play" title="播放走勢動畫">
           <i class="fa-solid fa-play" id="playIcon"></i>
-          <span id="playText">播放走勢動畫</span>
+          <span id="playText">播放</span>
         </button>
-        <button id="btnPause" class="sz-btn-ctrl" title="暫停走勢動畫">
+        <button id="btnPause" class="sz-btn-ctrl" title="暫停動畫">
           <i class="fa-solid fa-pause"></i> 暫停
         </button>
-        <button id="btnStop" class="sz-btn-ctrl" title="停止走勢動畫並重設">
+        <button id="btnStop" class="sz-btn-ctrl" title="停止並重設">
           <i class="fa-solid fa-stop"></i> 停止
         </button>
-        <button id="btnReplay" class="sz-btn-ctrl" title="清空曲線並重新自左向右播放">
+        <button id="btnReplay" class="sz-btn-ctrl" title="重播動畫">
           <i class="fa-solid fa-rotate-left"></i> 重播
         </button>
 
-        <!-- Playback Duration Selector (5秒播完 vs 10秒播完) -->
+        <!-- Playback Duration Selector (5秒 vs 10秒) -->
         <div class="sz-duration-group">
-          <span class="sz-group-label"><i class="fa-solid fa-stopwatch"></i> 播完時間：</span>
+          <span class="sz-group-label"><i class="fa-solid fa-stopwatch"></i> 時長：</span>
           <button class="sz-btn-duration active" data-duration="5" id="btnDuration5s">
-            <i class="fa-solid fa-bolt text-yellow"></i> 5 秒播完
+            <i class="fa-solid fa-bolt text-yellow"></i> 5秒
           </button>
           <button class="sz-btn-duration" data-duration="10" id="btnDuration10s">
-            <i class="fa-solid fa-clock"></i> 10 秒播完
+            <i class="fa-solid fa-clock"></i> 10秒
           </button>
         </div>
       </div>
@@ -169,32 +169,30 @@
       <div class="sz-ctrl-timeline">
         <div class="sz-timeline-info">
           <span class="sz-anim-tip-badge" id="animStatusTip">
-            <i class="fa-solid fa-circle-info"></i> 尚未播放（點選播放後開始向右繪製多股走勢）
+            <i class="fa-solid fa-circle-info"></i> 尚未播放
           </span>
           <span class="sz-step-readout">
-            進度：第 <strong id="currentStepNum" class="text-yellow">0</strong> / <strong id="totalStepsNum">0</strong> 根
-            1分K
-            （時間：<span id="currentStepTime" class="text-cyan">--:--</span>）
+            進度：<strong id="currentStepNum" class="text-yellow">0</strong>/<strong id="totalStepsNum">0</strong>（<span id="currentStepTime" class="text-cyan">--:--</span>）
           </span>
         </div>
         <input type="range" id="animSlider" min="0" max="100" value="0" step="1">
       </div>
 
-      <!-- Timeframe Days Selector (五日為最後收盤日往前推五日) -->
+      <!-- Timeframe Days Selector -->
       <div class="sz-ctrl-days">
-        <span class="sz-group-label">走勢天數：</span>
+        <span class="sz-group-label">天數：</span>
         <div class="sz-days-pills">
-          <button class="sz-btn-day active" data-days="5" id="btnFiveDays">最後收盤往前推5日</button>
-          <button class="sz-btn-day" data-days="3">前推 3 日</button>
-          <button class="sz-btn-day" data-days="1">當日分時</button>
+          <button class="sz-btn-day active" data-days="5" id="btnFiveDays">5日</button>
+          <button class="sz-btn-day" data-days="3">3日</button>
+          <button class="sz-btn-day" data-days="1">1日</button>
         </div>
         <div class="sz-custom-day">
           <span>自訂:</span>
           <input type="number" id="inputCustomDays" min="1" max="30" value="5">
           <span>天</span>
         </div>
-        <button id="btnRefreshData" class="sz-btn-refresh" title="重新篩選上週一約100元股票並刷新行情">
-          <i class="fa-solid fa-arrows-rotate"></i> 重新篩選
+        <button id="btnRefreshData" class="sz-btn-refresh" title="重新整理行情資料">
+          <i class="fa-solid fa-arrows-rotate"></i> 重整
         </button>
       </div>
     </section>
@@ -207,7 +205,7 @@
         <div class="sz-panel-header">
           <div class="sz-title-with-legend">
             <h2 class="sz-panel-title" id="chartMainTitle">
-              <i class="fa-solid fa-chart-line"></i> 向右推進
+              <i class="fa-solid fa-chart-line"></i> 走勢圖
             </h2>
             <div class="sz-legend" id="multiStockLegend">
               <!-- Dynamically populated stock line legends -->
@@ -226,13 +224,13 @@
                 <i class="fa-solid fa-rotate-left"></i>
               </button>
               <div class="sz-fs-duration-group">
-                <button class="sz-btn-fs-duration active" data-duration="5" id="btnFsDuration5s">5秒播完</button>
-                <button class="sz-btn-fs-duration" data-duration="10" id="btnFsDuration10s">10秒播完</button>
+                <button class="sz-btn-fs-duration active" data-duration="5" id="btnFsDuration5s">5秒</button>
+                <button class="sz-btn-fs-duration" data-duration="10" id="btnFsDuration10s">10秒</button>
               </div>
             </div>
-            <span class="sz-mode-badge" id="chartStatusBadge">等待播放中</span>
-            <button id="btnExitFullscreen" class="sz-btn-exit-fs hidden" title="結束全螢幕 (或按 ESC 鍵)">
-              <i class="fa-solid fa-compress"></i> 結束全螢幕 (ESC)
+            <span class="sz-mode-badge" id="chartStatusBadge">等待中</span>
+            <button id="btnExitFullscreen" class="sz-btn-exit-fs hidden" title="退出全螢幕 (ESC)">
+              <i class="fa-solid fa-compress"></i> 退出
             </button>
             <button id="btnPanelFullscreen" class="sz-btn-mini-fs" title="展開全螢幕">
               <i class="fa-solid fa-expand"></i> 全螢幕
@@ -243,6 +241,9 @@
         <!-- Chart Canvas Container -->
         <div class="sz-chart-canvas-wrap">
           <div id="sanzhuTrendChart" class="sz-echarts-dom"></div>
+          
+          <!-- Fireworks Canvas Overlay (跑完動畫跟出現結算畫面之間，出現幾個零星的煙火動畫) -->
+          <canvas id="szFireworksCanvas" class="sz-fireworks-canvas"></canvas>
 
           <!-- Pre-play Alert Overlay (點選播放前絕對不繪製曲線) -->
           <div id="prePlayOverlay" class="sz-preplay-overlay">
@@ -254,7 +255,7 @@
                 Y軸為真實股價！南茂(8150)由最後一名逆轉奪得第1名！可選5秒或10秒極速播完。
               </p>
               <button id="btnOverlayPlay" class="sz-btn-big-play">
-                <i class="fa-solid fa-play"></i> 點擊此處立即播放走勢動畫
+                <i class="fa-solid fa-play"></i> 點此播放
               </button>
             </div>
           </div>
@@ -262,7 +263,7 @@
           <!-- Loading Overlay -->
           <div id="chartLoadingOverlay" class="sz-loading-overlay hidden">
             <div class="sz-spinner"></div>
-            <span id="loadingMsg">正在自富果 Fugle API 同步下載半導體標的 5日1分鐘分時行情...</span>
+            <span id="loadingMsg">正在自富果 Fugle API 同步下載半導體標的分時行情...</span>
           </div>
         </div>
       </section>
@@ -272,15 +273,15 @@
         <!-- Header for Multi-Stock Compare Mode -->
         <div class="sz-panel-header" id="headerMultiTable">
           <h2 class="sz-panel-title">
-            <i class="fa-solid fa-ranking-star text-yellow"></i> 捧花爭奪即時排名榜
+            <i class="fa-solid fa-ranking-star text-yellow"></i> 即時排名
           </h2>
-          <span class="sz-table-hint">名次變動平滑上下滑動置換</span>
+          <span class="sz-table-hint">動態排序</span>
         </div>
 
         <!-- Header for Single-Stock Detail Mode (Hidden in multi mode) -->
         <div class="sz-panel-header hidden" id="headerSingleTable">
           <h2 class="sz-panel-title">
-            <i class="fa-solid fa-table-list"></i> 每1分鐘股價明細表 (<span id="tableRowsCount">0</span> 筆)
+            <i class="fa-solid fa-table-list"></i> 明細表 (<span id="tableRowsCount">0</span> 筆)
           </h2>
           <div class="sz-table-opts">
             <label class="sz-checkbox-label">
@@ -294,10 +295,10 @@
         <div class="sz-ranking-wrapper" id="multiRankingContainer">
           <div class="sz-ranking-header-row">
             <div style="width: 14%;">名次</div>
-            <div style="width: 27%;">比價股票</div>
-            <div style="width: 20%; text-align: right;">當前價格</div>
+            <div style="width: 27%;">標的</div>
+            <div style="width: 20%; text-align: right;">現價</div>
             <div style="width: 17%; text-align: right;">漲跌</div>
-            <div style="width: 22%; text-align: right;">當前幅度%</div>
+            <div style="width: 22%; text-align: right;">幅度%</div>
           </div>
           <div class="sz-ranking-body-rows" id="multiRankingRowsContainer">
             <!-- Positioned rows with transition: top 0.3s ease for smooth up/down sliding! -->
@@ -325,8 +326,8 @@
 
         <!-- Table Footer Summary -->
         <div class="sz-table-footer">
-          <span id="footerDesc">參賽股票數：<strong id="footerStockCount" class="text-yellow">5</strong> 檔</span>
-          <span>5日區間：<strong id="footerDateRange" class="text-cyan">-- ~ --</strong></span>
+          <span id="footerDesc">檔數：<strong id="footerStockCount" class="text-yellow">5</strong></span>
+          <span>區間：<strong id="footerDateRange" class="text-cyan">-- ~ --</strong></span>
         </div>
       </section>
     </main>
@@ -338,7 +339,7 @@
     <div class="sz-modal-box sz-results-modal">
       <div class="sz-modal-header">
         <h3 class="sz-results-title">
-          💐 抽捧花大作戰 • 捧花得主最終排名結算
+          💐 捧花得主結算
         </h3>
         <button id="btnCloseResultsModal" class="sz-btn-close">&times;</button>
       </div>
@@ -354,10 +355,10 @@
             <thead>
               <tr>
                 <th style="width: 12%;">名次</th>
-                <th style="width: 28%;">股票</th>
-                <th style="width: 20%; text-align: right;">最終收盤</th>
-                <th style="width: 18%; text-align: right;">最終漲跌</th>
-                <th style="width: 22%; text-align: right;">累積漲跌幅%</th>
+                <th style="width: 28%;">標的</th>
+                <th style="width: 20%; text-align: right;">收盤</th>
+                <th style="width: 18%; text-align: right;">漲跌</th>
+                <th style="width: 22%; text-align: right;">總幅度%</th>
               </tr>
             </thead>
             <tbody id="finalResultsTableBody">
@@ -368,9 +369,9 @@
       </div>
       <div class="sz-modal-footer sz-results-footer">
         <button id="btnModalReplay" class="sz-btn-modal-replay">
-          <i class="fa-solid fa-rotate-left"></i> 重新抽捧花 (播放動畫)
+          <i class="fa-solid fa-rotate-left"></i> 再次播放
         </button>
-        <button id="btnModalClose" class="sz-btn-modal-close">關閉視窗</button>
+        <button id="btnModalClose" class="sz-btn-modal-close">關閉</button>
       </div>
     </div>
   </div>
@@ -379,7 +380,7 @@
   <div id="settingsModal" class="sz-modal-overlay hidden">
     <div class="sz-modal-box">
       <div class="sz-modal-header">
-        <h3><i class="fa-solid fa-sliders"></i> 抽捧花大作戰 • 系統設定</h3>
+        <h3 class="sz-modal-title"><i class="fa-solid fa-gear"></i> 系統偏好設定</h3>
         <button id="btnCloseModal" class="sz-btn-close">&times;</button>
       </div>
       <div class="sz-modal-body">
@@ -390,23 +391,22 @@
         </div>
         <div class="sz-form-field">
           <label>動畫音效回饋 (WebAudio)：</label>
-          <label class="sz-checkbox-label">
+          <label class="sz-toggle-switch">
             <input type="checkbox" id="checkSound" checked>
-            <span>啟用播放跳動時的逐筆微音效</span>
+            <span class="sz-toggle-slider"></span>
           </label>
         </div>
         <div class="sz-info-note">
-          <p>★ 說明：系統透過富果 Fugle Market Data API 抓取半導體指標股與ETF（由最後收盤日往前推 5 日、每 1 分鐘一筆），並精選具備自第 5 名一路超車逆轉至第 1
-            名的強勢股進行搶捧花競速動畫！</p>
+          <p>★ 說明：系統透過富果 Fugle Market Data API 抓取100元半導體標的（由最後收盤日往前推 5 日、每 1 分鐘一筆），並由南茂(8150)由最後一名一路逆轉奪下第 1 名冠軍捧花！</p>
         </div>
       </div>
       <div class="sz-modal-footer">
-        <button id="btnSaveSettings" class="sz-btn-save">儲存設定並刷新</button>
+        <button id="btnSaveSettings" class="sz-btn-primary">儲存設定</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
+  <!-- Micro-Notification Toast Container -->
   <div id="toastContainer" class="sz-toast-container"></div>
 
   <!-- App Script -->

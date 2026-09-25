@@ -867,6 +867,131 @@ function renderSingleStockChart(hasStarted, currentStep) {
 }
 
 // ===================================================================
+// Sporadic Fireworks Animation Engine (跑完動畫跟出現結算畫面之間，出現幾個零星的煙火動畫)
+// ===================================================================
+let fireworksAnimId = null;
+let fireworksParticles = [];
+let fireworksTimeoutIds = [];
+
+function startSporadicFireworks() {
+  const canvas = document.getElementById('szFireworksCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+
+  stopFireworks();
+
+  const festiveColors = [
+    '#ffd700', // Gold
+    '#ff3344', // Red
+    '#00e5ff', // Cyan
+    '#ff00cc', // Magenta
+    '#00ff66', // Lime
+    '#ffffff', // Pure White
+    '#ffaa00'  // Amber
+  ];
+
+  function createBurst(x, y, count = 38) {
+    const mainColor = festiveColors[Math.floor(Math.random() * festiveColors.length)];
+    const secColor = festiveColors[Math.floor(Math.random() * festiveColors.length)];
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
+      const speed = (Math.random() * 4.2 + 2.2) * dpr;
+      fireworksParticles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        alpha: 1.0,
+        decay: Math.random() * 0.018 + 0.016,
+        color: Math.random() > 0.35 ? mainColor : secColor,
+        size: (Math.random() * 3.5 + 2.0) * dpr
+      });
+    }
+  }
+
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // Burst 1: immediate (center-left)
+  createBurst(w * 0.35 + (Math.random() - 0.5) * w * 0.15, h * 0.36 + (Math.random() - 0.5) * h * 0.15, 42);
+
+  // Burst 2: +250ms (center-right)
+  fireworksTimeoutIds.push(setTimeout(() => {
+    if (!state.animation.hasStarted) return;
+    createBurst(w * 0.65 + (Math.random() - 0.5) * w * 0.15, h * 0.30 + (Math.random() - 0.5) * h * 0.15, 38);
+  }, 250));
+
+  // Burst 3: +580ms (center-high)
+  fireworksTimeoutIds.push(setTimeout(() => {
+    if (!state.animation.hasStarted) return;
+    createBurst(w * 0.50 + (Math.random() - 0.5) * w * 0.20, h * 0.24 + (Math.random() - 0.5) * h * 0.12, 45);
+  }, 580));
+
+  // Burst 4: +920ms (sparkle burst)
+  fireworksTimeoutIds.push(setTimeout(() => {
+    if (!state.animation.hasStarted) return;
+    createBurst(w * 0.42 + (Math.random() - 0.5) * w * 0.25, h * 0.38 + (Math.random() - 0.5) * h * 0.15, 36);
+  }, 920));
+
+  function renderFireworks() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = fireworksParticles.length - 1; i >= 0; i--) {
+      const p = fireworksParticles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.06 * dpr; // subtle gravity
+      p.vx *= 0.975;
+      p.vy *= 0.975;
+      p.alpha -= p.decay;
+
+      if (p.alpha <= 0) {
+        fireworksParticles.splice(i, 1);
+        continue;
+      }
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 8 * dpr;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.alpha, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    if (fireworksParticles.length > 0) {
+      fireworksAnimId = requestAnimationFrame(renderFireworks);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      fireworksAnimId = null;
+    }
+  }
+
+  fireworksAnimId = requestAnimationFrame(renderFireworks);
+}
+
+function stopFireworks() {
+  if (fireworksAnimId) {
+    cancelAnimationFrame(fireworksAnimId);
+    fireworksAnimId = null;
+  }
+  fireworksTimeoutIds.forEach(id => clearTimeout(id));
+  fireworksTimeoutIds = [];
+  fireworksParticles = [];
+  const canvas = document.getElementById('szFireworksCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// ===================================================================
 // Animation Engine (精準 5 秒播完 或 10 秒播完，requestAnimationFrame 流暢渲染)
 // "播放動畫時鑰可選擇5秒播完或是10秒播完"
 // ===================================================================
@@ -880,6 +1005,7 @@ let modalTimerId = null;
 function startAnimation() {
   if (state.animation.isPlaying) return;
 
+  stopFireworks();
   if (modalTimerId) {
     clearTimeout(modalTimerId);
     modalTimerId = null;
@@ -940,6 +1066,7 @@ function pauseAnimation() {
 
 // Dedicated STOP Button Handler: Halts playback and resets curves
 function stopAnimation() {
+  stopFireworks();
   if (modalTimerId) {
     clearTimeout(modalTimerId);
     modalTimerId = null;
@@ -955,7 +1082,7 @@ function stopAnimation() {
   updateRightTable();
   updateTopQuoteStrip(null);
 
-  showToast('走勢動畫已停止並重設', 'info');
+  showToast('動畫已停止並重設', 'info');
 }
 
 function togglePlayPause() {
@@ -967,6 +1094,7 @@ function togglePlayPause() {
 }
 
 function replayAnimation() {
+  stopFireworks();
   if (modalTimerId) {
     clearTimeout(modalTimerId);
     modalTimerId = null;
@@ -983,6 +1111,7 @@ function replayAnimation() {
 }
 
 function seekToStep(step) {
+  stopFireworks();
   if (modalTimerId) {
     clearTimeout(modalTimerId);
     modalTimerId = null;
@@ -1004,7 +1133,7 @@ function onStepAdvanced() {
 }
 
 // Triggered when animation reaches the end
-// STRICT REQUIREMENT: "跑完動畫之後等2秒再出現結算頁面"
+// "跑完動畫跟出現結算畫面之間，出現幾個零星的煙火動畫，並把等待時間由兩秒改為1.5秒"
 function onAnimationFinished() {
   pauseAnimation();
   onStepAdvanced();
@@ -1014,11 +1143,14 @@ function onAnimationFinished() {
     modalTimerId = null;
   }
 
-  // 等待 2 秒後再彈出結算視窗
+  // 1. 跑完動畫與出現結算畫面之間，出現幾個零星的煙火動畫
+  startSporadicFireworks();
+
+  // 2. 等待時間由兩秒改為 1.5 秒 (1500ms) 再出現結算畫面
   modalTimerId = setTimeout(() => {
     modalTimerId = null;
     showFinalRankingModal();
-  }, 2000);
+  }, 1500);
 }
 
 // Selectable Duration (5秒播完 vs 10秒播完)
@@ -1291,8 +1423,8 @@ function showFinalRankingModal() {
     const isUp = champ.change >= 0;
     const col = isUp ? '#ff3333' : '#00e600';
     banner.innerHTML = `
-      <div class="champion-text">💐 抽捧花大作戰 • 捧花得主：${champ.name} (${champ.symbol}) 💐</div>
-      <div class="champion-sub">5日結算收盤價：<strong style="color:${col};font-size:20px;">${Number(champ.price).toFixed(1)} 元</strong> (${champ.change >= 0 ? '+' : ''}${champ.change} / ${champ.changePct.toFixed(2)}%)</div>
+      <div class="champion-text">💐 捧花得主：${champ.name} (${champ.symbol}) 💐</div>
+      <div class="champion-sub">5日收盤：<strong style="color:${col};font-size:20px;">${Number(champ.price).toFixed(1)} 元</strong> (${champ.change >= 0 ? '+' : ''}${champ.change} / ${champ.changePct.toFixed(2)}%)</div>
     `;
   }
 
@@ -1310,7 +1442,7 @@ function showFinalRankingModal() {
         <td><strong style="font-size:16px;color:${rank === 1 ? '#fbbf24' : '#ccc'};">#${rank}</strong></td>
         <td>
           <span class="stock-dot" style="display:inline-block;background:${item.color};margin-right:6px;"></span>
-          <strong>${item.name}</strong> <small class="text-gray">${item.symbol}</small>
+          <strong>${item.name}</strong> <small class="stock-modal-code">${item.symbol}</small>
         </td>
         <td style="text-align:right;" class="${colorClass}"><strong>${Number(item.price).toFixed(1)} 元</strong></td>
         <td style="text-align:right;" class="${colorClass}">${sign}${item.change}</td>
@@ -1326,6 +1458,7 @@ function showFinalRankingModal() {
 }
 
 function hideFinalRankingModal() {
+  stopFireworks();
   if (modalTimerId) {
     clearTimeout(modalTimerId);
     modalTimerId = null;
@@ -1506,21 +1639,21 @@ function switchMode(mode, singleSym = null) {
   const footerDesc = document.getElementById('footerDesc');
 
   if (mode === 'multi') {
-    modeBadge.textContent = '多股同台比價模式';
-    chartTitle.innerHTML = `<i class="fa-solid fa-chart-line"></i> 抽捧花大作戰 • 多股同台分時走勢動畫 (每1分鐘一筆 • 逐步向右推進)`;
+    modeBadge.textContent = '多股比價';
+    chartTitle.innerHTML = `<i class="fa-solid fa-chart-line"></i> 走勢圖`;
     headerMulti.classList.remove('hidden');
     headerSingle.classList.add('hidden');
     multiContainer.classList.remove('hidden');
     singleContainer.classList.add('hidden');
-    footerDesc.innerHTML = `正在比價股票數：<strong class="text-yellow">${state.symbols.length}</strong> 檔`;
+    footerDesc.innerHTML = `檔數：<strong class="text-yellow">${state.symbols.length}</strong>`;
   } else {
-    modeBadge.textContent = `個股分時明細 (${state.selectedSingleSymbol})`;
-    chartTitle.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${state.stockDataMap[state.selectedSingleSymbol]?.tickerInfo?.name || state.selectedSingleSymbol} 分時走勢圖 (每1分鐘一筆)`;
+    modeBadge.textContent = `個股明細 (${state.selectedSingleSymbol})`;
+    chartTitle.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${state.stockDataMap[state.selectedSingleSymbol]?.tickerInfo?.name || state.selectedSingleSymbol} 分時圖`;
     headerMulti.classList.add('hidden');
     headerSingle.classList.remove('hidden');
     multiContainer.classList.add('hidden');
     singleContainer.classList.remove('hidden');
-    footerDesc.innerHTML = `當前個股：<strong class="text-yellow">${state.selectedSingleSymbol}</strong>`;
+    footerDesc.innerHTML = `個股：<strong class="text-yellow">${state.selectedSingleSymbol}</strong>`;
     populateSingleStock10mTable();
   }
 
@@ -1547,14 +1680,14 @@ function toggleFullscreen(forceState = null) {
       document.documentElement.requestFullscreen().catch(() => {});
     }
     icon.className = 'fa-solid fa-compress';
-    text.textContent = '結束全螢幕';
-    showToast('已進入純淨全螢幕比價模式 (走勢圖 + 右方表格)', 'info');
+    text.textContent = '退出';
+    showToast('已進入純淨全螢幕比價模式', 'info');
   } else {
     if (document.exitFullscreen && document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
     icon.className = 'fa-solid fa-expand';
-    text.textContent = '全螢幕顯示';
+    text.textContent = '全螢幕';
   }
 
   setTimeout(() => sanzhuChartInstance?.resize(), 100);
@@ -1630,12 +1763,12 @@ function updateTimelineSliderUI() {
 
   if (timeStr && state.animation.hasStarted) {
     curTimeEl.textContent = timeStr;
-    tipEl.innerHTML = `<span style="color:#00e5ff;">● 正在繪製：${timeStr} (第 ${cur}/${tot} 根) • ${state.animation.targetDurationSec}秒播完</span>`;
-    badgeEl.textContent = `播放中: ${cur}/${tot} (${state.animation.targetDurationSec}s)`;
+    tipEl.innerHTML = `<span style="color:#00e5ff;">● 繪製中：${timeStr} (${cur}/${tot})</span>`;
+    badgeEl.textContent = `播放中 (${state.animation.targetDurationSec}s)`;
   } else {
     curTimeEl.textContent = '--:--';
-    tipEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> 尚未播放（點選播放後開始向右繪製多股走勢，${state.animation.targetDurationSec}秒播完）`;
-    badgeEl.textContent = `等待播放中`;
+    tipEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> 尚未播放`;
+    badgeEl.textContent = `等待中`;
   }
 }
 
@@ -1650,11 +1783,11 @@ function updatePlayButtonUI(isPlaying) {
   if (isPlaying) {
     icon.className = 'fa-solid fa-pause';
     if (fsIcon) fsIcon.className = 'fa-solid fa-pause';
-    text.textContent = '暫停動畫';
+    text.textContent = '暫停';
   } else {
     icon.className = 'fa-solid fa-play';
     if (fsIcon) fsIcon.className = 'fa-solid fa-play';
-    text.textContent = '播放走勢動畫';
+    text.textContent = '播放';
   }
 }
 
