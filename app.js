@@ -12,7 +12,7 @@ const CONFIG = {
   defaultApiKey: 'MzFjZmQ2N2MtZGFmOS00NGFhLWEyODctODAxZDViZDQwYjBiIGIwOWJlY2JiLTZmZTgtNDhjYS1iOWJhLTVjNWZhYmVlMmI3Nw==',
   apiBaseUrl: 'https://api.fugle.tw/marketdata/v1.0/stock',
   cacheTtlMs: 5 * 60 * 1000,
-  rowHeight: 52, // px per sliding ranking row
+  rowHeight: 62, // px per sliding ranking row (配合大字體62px無溢出)
   seriesColors: [
     '#00e5ff', // 1: Cyan (南茂 8150 - 黑馬逆轉色)
     '#ff3333', // 2: Red
@@ -521,7 +521,7 @@ function renderMultiStockChart(hasStarted, currentStep) {
             {
               coord: [lastIdx, lastPrice],
               symbol: 'circle',
-              symbolSize: 8,
+              symbolSize: 10,
               itemStyle: {
                 color: color,
                 borderColor: '#ffffff',
@@ -536,12 +536,12 @@ function renderMultiStockChart(hasStarted, currentStep) {
                 color: color,
                 fontFamily: 'JetBrains Mono',
                 fontWeight: 'bold',
-                fontSize: 12,
+                fontSize: 15,
                 backgroundColor: 'rgba(0, 0, 0, 0.85)',
                 borderColor: color,
                 borderWidth: 1,
-                borderRadius: 2,
-                padding: [1, 4]
+                borderRadius: 3,
+                padding: [2, 6]
               }
             }
           ]
@@ -579,11 +579,11 @@ function renderMultiStockChart(hasStarted, currentStep) {
       borderColor: '#ffff00',
       borderWidth: 1,
       padding: [8, 12],
-      textStyle: { color: '#ffffff', fontFamily: 'JetBrains Mono', fontSize: 13 },
+      textStyle: { color: '#ffffff', fontFamily: 'JetBrains Mono', fontSize: 14 },
       formatter: function(params) {
         if (!params || params.length === 0) return '';
         const idx = params[0].dataIndex;
-        let html = `<div style="font-weight:bold;color:#00e5ff;margin-bottom:6px;font-size:14px;">⏱ ${timeAxis[idx] || ''}</div>`;
+        let html = `<div style="font-weight:bold;color:#00e5ff;margin-bottom:6px;font-size:15px;">⏱ ${timeAxis[idx] || ''}</div>`;
 
         // Sort by current stock price descending
         const sorted = [...params].sort((a, b) => (b.value || 0) - (a.value || 0));
@@ -598,12 +598,12 @@ function renderMultiStockChart(hasStarted, currentStep) {
           const sign = diff >= 0 ? '+' : '';
 
           html += `
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:3px;font-size:13px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:3px;font-size:14px;">
               <span>
                 <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.color};margin-right:6px;"></span>
                 <span>${p.seriesName}</span>
               </span>
-              <strong style="color:${col};font-size:15px;">${val} 元 (${sign}${diff} / ${sign}${diffPct.toFixed(2)}%)</strong>
+              <strong style="color:${col};font-size:16px;">${val} 元 (${sign}${diff} / ${sign}${diffPct.toFixed(2)}%)</strong>
             </div>
           `;
         });
@@ -611,10 +611,10 @@ function renderMultiStockChart(hasStarted, currentStep) {
       }
     },
     grid: {
-      left: 65,
-      right: 75,
-      top: 30,
-      bottom: 35
+      left: 75,
+      right: 110,
+      top: 32,
+      bottom: 40
     },
     xAxis: {
       type: 'category',
@@ -630,7 +630,7 @@ function renderMultiStockChart(hasStarted, currentStep) {
         show: true,
         color: '#00e5ff',
         fontFamily: 'JetBrains Mono',
-        fontSize: 13,
+        fontSize: 17,
         fontWeight: 'bold',
         interval: (index) => midIndexSet.has(index),
         // STRICT REQUIREMENT: "動畫圖表的X軸只需要顯示日期即可"
@@ -654,7 +654,7 @@ function renderMultiStockChart(hasStarted, currentStep) {
       axisLabel: {
         color: '#00e5ff',
         fontFamily: 'JetBrains Mono',
-        fontSize: 12,
+        fontSize: 16,
         fontWeight: 'bold',
         formatter: '{value} 元'
       },
@@ -683,9 +683,9 @@ function renderMultiStockChart(hasStarted, currentStep) {
                 formatter: '100.00 元基準線',
                 color: '#ffff00',
                 fontFamily: 'JetBrains Mono',
-                fontSize: 12,
+                fontSize: 15,
                 backgroundColor: 'rgba(0, 0, 0, 0.75)',
-                padding: [2, 4]
+                padding: [2, 6]
               }
             }
           ]
@@ -1639,16 +1639,16 @@ function switchMode(mode, singleSym = null) {
   const footerDesc = document.getElementById('footerDesc');
 
   if (mode === 'multi') {
-    modeBadge.textContent = '多股比價';
-    chartTitle.innerHTML = `<i class="fa-solid fa-chart-line"></i> 走勢圖`;
+    if (modeBadge) modeBadge.textContent = '多股比價';
+    if (chartTitle) chartTitle.innerHTML = `<i class="fa-solid fa-chart-line"></i> 走勢圖`;
     headerMulti.classList.remove('hidden');
     headerSingle.classList.add('hidden');
     multiContainer.classList.remove('hidden');
     singleContainer.classList.add('hidden');
     footerDesc.innerHTML = `檔數：<strong class="text-yellow">${state.symbols.length}</strong>`;
   } else {
-    modeBadge.textContent = `個股明細 (${state.selectedSingleSymbol})`;
-    chartTitle.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${state.stockDataMap[state.selectedSingleSymbol]?.tickerInfo?.name || state.selectedSingleSymbol} 分時圖`;
+    if (modeBadge) modeBadge.textContent = `個股明細 (${state.selectedSingleSymbol})`;
+    if (chartTitle) chartTitle.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${state.stockDataMap[state.selectedSingleSymbol]?.tickerInfo?.name || state.selectedSingleSymbol} 分時圖`;
     headerMulti.classList.add('hidden');
     headerSingle.classList.remove('hidden');
     multiContainer.classList.add('hidden');
@@ -1665,7 +1665,7 @@ function switchMode(mode, singleSym = null) {
   setTimeout(() => sanzhuChartInstance?.resize(), 50);
 }
 
-// Fullscreen Controller
+// Fullscreen Controller (全螢幕按鈕保留icon就好)
 function toggleFullscreen(forceState = null) {
   const isFs = forceState !== null ? forceState : !state.isFullscreen;
   state.isFullscreen = isFs;
@@ -1679,15 +1679,15 @@ function toggleFullscreen(forceState = null) {
     if (document.documentElement.requestFullscreen) {
       document.documentElement.requestFullscreen().catch(() => {});
     }
-    icon.className = 'fa-solid fa-compress';
-    text.textContent = '退出';
+    if (icon) icon.className = 'fa-solid fa-compress';
+    if (text) text.textContent = '退出';
     showToast('已進入純淨全螢幕比價模式', 'info');
   } else {
     if (document.exitFullscreen && document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
-    icon.className = 'fa-solid fa-expand';
-    text.textContent = '全螢幕';
+    if (icon) icon.className = 'fa-solid fa-expand';
+    if (text) text.textContent = '全螢幕';
   }
 
   setTimeout(() => sanzhuChartInstance?.resize(), 100);

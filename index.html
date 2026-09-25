@@ -29,44 +29,35 @@
   <!-- Main Application Wrapper -->
   <div id="appContainer" class="sz-app-wrapper">
 
-    <!-- Top System Header Bar (Normal mode) -->
+    <!-- Top System Header Bar (精簡Header資料，一行不換行) -->
     <header class="sz-sysbar">
       <div class="sz-sys-left">
         <span class="sz-brand-logo">抽捧花大作戰 💐</span>
-        <span class="sz-badge-tag" id="currentModeBadge">多股比價</span>
-        <span class="sz-sub-badge" id="strategyFilterBadge">
-          <i class="fa-solid fa-microchip"></i> 100元半導體對決
-        </span>
-        <span class="sz-api-status" id="apiStatusIndicator">
-          <span class="dot-online"></span> Fugle API 正常
-        </span>
-        <span class="sz-rate-limit">額度: <strong id="rateLimitBadge">--</strong>/60</span>
       </div>
       <div class="sz-sys-right">
         <!-- View Mode Switch -->
         <div class="sz-mode-switch">
-          <button class="sz-btn-mode active" id="btnModeMulti" data-mode="multi" title="多股同台比價">
-            <i class="fa-solid fa-layer-group"></i> 多股比價
+          <button class="sz-btn-mode active" id="btnModeMulti" data-mode="multi" title="多股比價">
+            <i class="fa-solid fa-layer-group"></i> 多股
           </button>
-          <button class="sz-btn-mode" id="btnModeSingle" data-mode="single" title="個股分時明細">
-            <i class="fa-solid fa-chart-line"></i> 個股明細
+          <button class="sz-btn-mode" id="btnModeSingle" data-mode="single" title="個股明細">
+            <i class="fa-solid fa-chart-line"></i> 個股
           </button>
         </div>
 
-        <!-- Fullscreen Button -->
-        <button id="btnFullscreenToggle" class="sz-btn-fullscreen" title="全螢幕播放">
+        <!-- Fullscreen Button (全螢幕按鈕保留icon就好) -->
+        <button id="btnFullscreenToggle" class="sz-btn-fullscreen sz-btn-icon-only" title="全螢幕 (F11/ESC)">
           <i class="fa-solid fa-expand" id="fullscreenIcon"></i>
-          <span id="fullscreenText">全螢幕</span>
         </button>
 
         <span class="sz-clock" id="liveClock">2026-09-25 21:00:00</span>
-        <button id="btnSettingsModal" class="sz-btn-sys" title="系統設定">
+        <button id="btnSettingsModal" class="sz-btn-sys" title="設定">
           <i class="fa-solid fa-gear"></i>
         </button>
       </div>
     </header>
 
-    <!-- Stock Selection Tabs Bar (Normal mode) -->
+    <!-- Stock Selection Tabs Bar -->
     <nav class="sz-stock-tabs-bar">
       <div class="sz-tabs-label">
         <i class="fa-solid fa-microchip"></i> 清單：
@@ -80,7 +71,7 @@
       </div>
     </nav>
 
-    <!-- Quotation Summary Strip (重點資訊 >= 18px) (Normal mode) -->
+    <!-- Quotation Summary Strip (大字超清晰，重點字體全面放大) -->
     <section class="sz-quote-strip">
       <div class="sz-quote-main">
         <div class="sz-stock-header">
@@ -98,7 +89,7 @@
         </div>
       </div>
 
-      <!-- Quote Metrics Table (重點數值 >= 18px) -->
+      <!-- Quote Metrics Table (重點數值大幅放大) -->
       <div class="sz-quote-metrics">
         <div class="sz-metric-item">
           <span class="sz-lbl">昨收</span>
@@ -135,7 +126,7 @@
       </div>
     </section>
 
-    <!-- Animation Control Deck (Normal mode) -->
+    <!-- Animation Control Deck (精簡標籤，字體加大) -->
     <section class="sz-ctrl-deck">
       <!-- Playback Controls -->
       <div class="sz-ctrl-playback">
@@ -143,17 +134,17 @@
           <i class="fa-solid fa-play" id="playIcon"></i>
           <span id="playText">播放</span>
         </button>
-        <button id="btnPause" class="sz-btn-ctrl" title="暫停動畫">
+        <button id="btnPause" class="sz-btn-ctrl" title="暫停">
           <i class="fa-solid fa-pause"></i> 暫停
         </button>
-        <button id="btnStop" class="sz-btn-ctrl" title="停止並重設">
+        <button id="btnStop" class="sz-btn-ctrl" title="停止">
           <i class="fa-solid fa-stop"></i> 停止
         </button>
-        <button id="btnReplay" class="sz-btn-ctrl" title="重播動畫">
+        <button id="btnReplay" class="sz-btn-ctrl" title="重播">
           <i class="fa-solid fa-rotate-left"></i> 重播
         </button>
 
-        <!-- Playback Duration Selector (5秒 vs 10秒) -->
+        <!-- Playback Duration Selector -->
         <div class="sz-duration-group">
           <span class="sz-group-label"><i class="fa-solid fa-stopwatch"></i> 時長：</span>
           <button class="sz-btn-duration active" data-duration="5" id="btnDuration5s">
@@ -191,7 +182,7 @@
           <input type="number" id="inputCustomDays" min="1" max="30" value="5">
           <span>天</span>
         </div>
-        <button id="btnRefreshData" class="sz-btn-refresh" title="重新整理行情資料">
+        <button id="btnRefreshData" class="sz-btn-refresh" title="重整行情">
           <i class="fa-solid fa-arrows-rotate"></i> 重整
         </button>
       </div>
@@ -229,11 +220,12 @@
               </div>
             </div>
             <span class="sz-mode-badge" id="chartStatusBadge">等待中</span>
-            <button id="btnExitFullscreen" class="sz-btn-exit-fs hidden" title="退出全螢幕 (ESC)">
-              <i class="fa-solid fa-compress"></i> 退出
+            <!-- 全螢幕按鈕保留icon就好 -->
+            <button id="btnExitFullscreen" class="sz-btn-exit-fs sz-btn-icon-only hidden" title="退出全螢幕 (ESC)">
+              <i class="fa-solid fa-compress"></i>
             </button>
-            <button id="btnPanelFullscreen" class="sz-btn-mini-fs" title="展開全螢幕">
-              <i class="fa-solid fa-expand"></i> 全螢幕
+            <button id="btnPanelFullscreen" class="sz-btn-mini-fs sz-btn-icon-only" title="全螢幕">
+              <i class="fa-solid fa-expand"></i>
             </button>
           </div>
         </div>
@@ -263,7 +255,7 @@
           <!-- Loading Overlay -->
           <div id="chartLoadingOverlay" class="sz-loading-overlay hidden">
             <div class="sz-spinner"></div>
-            <span id="loadingMsg">正在自富果 Fugle API 同步下載半導體標的分時行情...</span>
+            <span id="loadingMsg">正在同步下載行情...</span>
           </div>
         </div>
       </section>
@@ -291,7 +283,7 @@
           </div>
         </div>
 
-        <!-- Table 1: Live Multi-Stock Ranking Table with SMOOTH UP/DOWN SLIDING ANIMATION -->
+        <!-- Table 1: Live Multi-Stock Ranking Table with SMOOTH UP/DOWN SLIDING ANIMATION (大字無溢出) -->
         <div class="sz-ranking-wrapper" id="multiRankingContainer">
           <div class="sz-ranking-header-row">
             <div style="width: 14%;">名次</div>
@@ -380,7 +372,7 @@
   <div id="settingsModal" class="sz-modal-overlay hidden">
     <div class="sz-modal-box">
       <div class="sz-modal-header">
-        <h3 class="sz-modal-title"><i class="fa-solid fa-gear"></i> 系統偏好設定</h3>
+        <h3 class="sz-modal-title"><i class="fa-solid fa-gear"></i> 偏好設定</h3>
         <button id="btnCloseModal" class="sz-btn-close">&times;</button>
       </div>
       <div class="sz-modal-body">
@@ -397,7 +389,7 @@
           </label>
         </div>
         <div class="sz-info-note">
-          <p>★ 說明：系統透過富果 Fugle Market Data API 抓取100元半導體標的（由最後收盤日往前推 5 日、每 1 分鐘一筆），並由南茂(8150)由最後一名一路逆轉奪下第 1 名冠軍捧花！</p>
+          <p>★ 說明：系統透過富果 Fugle Market Data API 抓取100元半導體標的（5日1分鐘分時），南茂(8150)由最後一名一路逆轉奪下冠軍捧花！</p>
         </div>
       </div>
       <div class="sz-modal-footer">
