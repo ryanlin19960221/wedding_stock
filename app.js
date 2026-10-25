@@ -13,6 +13,7 @@ const CONFIG = {
   apiBaseUrl: 'https://api.fugle.tw/marketdata/v1.0/stock',
   cacheTtlMs: 5 * 60 * 1000,
   rowHeight: 62, // px per sliding ranking row (配合大字體62px無溢出)
+  rowHeightFs: 124, // 全螢幕時字體放大兩倍，行高相應放大至 124px
   seriesColors: [
     '#00e5ff', // 1: Cyan (南茂 8150 - 黑馬逆轉色)
     '#ff3333', // 2: Red
@@ -24,6 +25,10 @@ const CONFIG = {
     '#ffffff'  // 8: Pure White
   ]
 };
+
+function getRowHeight() {
+  return state.isFullscreen ? CONFIG.rowHeightFs : CONFIG.rowHeight;
+}
 
 // Application State
 const state = {
@@ -517,6 +522,8 @@ function renderMultiStockChart(hasStarted, currentStep) {
     let priceSeries = [];
     let tipMarkPoint = null;
 
+    const isFs = state.isFullscreen;
+
     if (hasStarted && currentStep > 0) {
       const sliced = candles.slice(0, currentStep);
       // REQUIREMENT: "Y軸改為股票價格"
@@ -532,11 +539,11 @@ function renderMultiStockChart(hasStarted, currentStep) {
             {
               coord: [lastIdx, lastPrice],
               symbol: 'circle',
-              symbolSize: 10,
+              symbolSize: isFs ? 18 : 10,
               itemStyle: {
                 color: color,
                 borderColor: '#ffffff',
-                borderWidth: 1.5,
+                borderWidth: isFs ? 2.5 : 1.5,
                 shadowColor: color,
                 shadowBlur: 8
               },
@@ -547,12 +554,12 @@ function renderMultiStockChart(hasStarted, currentStep) {
                 color: color,
                 fontFamily: 'JetBrains Mono',
                 fontWeight: 'bold',
-                fontSize: 15,
+                fontSize: isFs ? 30 : 15,
                 backgroundColor: 'rgba(0, 0, 0, 0.85)',
                 borderColor: color,
                 borderWidth: 1,
-                borderRadius: 3,
-                padding: [2, 6]
+                borderRadius: isFs ? 5 : 3,
+                padding: isFs ? [4, 10] : [2, 6]
               }
             }
           ]
@@ -568,13 +575,15 @@ function renderMultiStockChart(hasStarted, currentStep) {
       showSymbol: false,
       lineStyle: {
         color: color,
-        width: 2.2,
+        width: isFs ? 3.5 : 2.2,
         shadowColor: color,
         shadowBlur: 4
       },
       markPoint: tipMarkPoint
     });
   });
+
+  const isFs = state.isFullscreen;
 
   const option = {
     backgroundColor: '#000000',
@@ -583,18 +592,22 @@ function renderMultiStockChart(hasStarted, currentStep) {
       trigger: 'axis',
       axisPointer: {
         type: 'cross',
-        lineStyle: { color: '#00e5ff', type: 'dashed' },
+        lineStyle: { color: '#00e5ff', type: 'dashed', width: isFs ? 2 : 1 },
         crossStyle: { color: '#00e5ff' }
       },
       backgroundColor: '#0a0a0a',
       borderColor: '#ffff00',
-      borderWidth: 1,
-      padding: [8, 12],
-      textStyle: { color: '#ffffff', fontFamily: 'JetBrains Mono', fontSize: 14 },
+      borderWidth: isFs ? 2 : 1,
+      padding: isFs ? [12, 18] : [8, 12],
+      textStyle: { color: '#ffffff', fontFamily: 'JetBrains Mono', fontSize: isFs ? 28 : 14 },
       formatter: function(params) {
         if (!params || params.length === 0) return '';
         const idx = params[0].dataIndex;
-        let html = `<div style="font-weight:bold;color:#00e5ff;margin-bottom:6px;font-size:15px;">⏱ ${timeAxis[idx] || ''}</div>`;
+        const timeFont = isFs ? '30px' : '15px';
+        const rowFont = isFs ? '28px' : '14px';
+        const valFont = isFs ? '32px' : '16px';
+        const dotSize = isFs ? '16px' : '9px';
+        let html = `<div style="font-weight:bold;color:#00e5ff;margin-bottom:8px;font-size:${timeFont};">⏱ ${timeAxis[idx] || ''}</div>`;
 
         // Sort by current stock price descending
         const sorted = [...params].sort((a, b) => (b.value || 0) - (a.value || 0));
@@ -609,12 +622,12 @@ function renderMultiStockChart(hasStarted, currentStep) {
           const sign = diff >= 0 ? '+' : '';
 
           html += `
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:3px;font-size:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:5px;font-size:${rowFont};">
               <span>
-                <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.color};margin-right:6px;"></span>
+                <span style="display:inline-block;width:${dotSize};height:${dotSize};border-radius:50%;background:${p.color};margin-right:8px;"></span>
                 <span>${p.seriesName}</span>
               </span>
-              <strong style="color:${col};font-size:16px;">${val} 元 (${sign}${diff} / ${sign}${diffPct.toFixed(2)}%)</strong>
+              <strong style="color:${col};font-size:${valFont};">${val} 元 (${sign}${diff} / ${sign}${diffPct.toFixed(2)}%)</strong>
             </div>
           `;
         });
@@ -622,26 +635,26 @@ function renderMultiStockChart(hasStarted, currentStep) {
       }
     },
     grid: {
-      left: 75,
-      right: 110,
-      top: 32,
-      bottom: 40
+      left: isFs ? 120 : 75,
+      right: isFs ? 190 : 110,
+      top: isFs ? 45 : 32,
+      bottom: isFs ? 70 : 40
     },
     xAxis: {
       type: 'category',
       data: timeAxis,
       boundaryGap: false,
-      axisLine: { lineStyle: { color: '#333333' } },
+      axisLine: { lineStyle: { color: '#333333', width: isFs ? 2 : 1 } },
       axisTick: {
         show: true,
         interval: (index) => dayStartIndexSet.has(index),
-        lineStyle: { color: '#555555' }
+        lineStyle: { color: '#555555', width: isFs ? 2 : 1 }
       },
       axisLabel: {
         show: true,
         color: '#00e5ff',
         fontFamily: 'JetBrains Mono',
-        fontSize: 17,
+        fontSize: isFs ? 34 : 17,
         fontWeight: 'bold',
         interval: (index) => midIndexSet.has(index),
         // STRICT REQUIREMENT: "動畫圖表的X軸只需要顯示日期即可"
@@ -653,7 +666,7 @@ function renderMultiStockChart(hasStarted, currentStep) {
       splitLine: {
         show: true,
         interval: (index) => dayStartIndexSet.has(index),
-        lineStyle: { color: '#262626', type: 'dashed', width: 1.2 }
+        lineStyle: { color: '#262626', type: 'dashed', width: isFs ? 2 : 1.2 }
       }
     },
     // STRICT REQUIREMENT: "Y軸改為股票價格"
@@ -665,13 +678,13 @@ function renderMultiStockChart(hasStarted, currentStep) {
       axisLabel: {
         color: '#00e5ff',
         fontFamily: 'JetBrains Mono',
-        fontSize: 16,
+        fontSize: isFs ? 32 : 16,
         fontWeight: 'bold',
         formatter: '{value} 元'
       },
       axisLine: { show: false },
       splitLine: {
-        lineStyle: { color: '#1c1c1c', type: 'dashed' }
+        lineStyle: { color: '#1c1c1c', type: 'dashed', width: isFs ? 2 : 1 }
       }
     },
     series: [
@@ -686,7 +699,7 @@ function renderMultiStockChart(hasStarted, currentStep) {
               lineStyle: {
                 color: '#ffff00',
                 type: [4, 4],
-                width: 1.8
+                width: isFs ? 3 : 1.8
               },
               label: {
                 show: true,
@@ -694,9 +707,9 @@ function renderMultiStockChart(hasStarted, currentStep) {
                 formatter: '100.00 元基準線',
                 color: '#ffff00',
                 fontFamily: 'JetBrains Mono',
-                fontSize: 15,
+                fontSize: isFs ? 30 : 15,
                 backgroundColor: 'rgba(0, 0, 0, 0.75)',
-                padding: [2, 6]
+                padding: isFs ? [4, 10] : [2, 6]
               }
             }
           ]
@@ -738,6 +751,8 @@ function renderSingleStockChart(hasStarted, currentStep) {
   const yMin = +(refClose - maxDiff).toFixed(2);
   const yMax = +(refClose + maxDiff).toFixed(2);
 
+  const isFs = state.isFullscreen;
+
   let tipMarkPoint = null;
   if (hasStarted && activeCandles.length > 0) {
     const lastIdx = activeCandles.length - 1;
@@ -748,8 +763,8 @@ function renderSingleStockChart(hasStarted, currentStep) {
         {
           coord: [lastIdx, lastCandle.close],
           symbol: 'circle',
-          symbolSize: 9,
-          itemStyle: { color: '#00e5ff', borderColor: '#fff', borderWidth: 2 }
+          symbolSize: isFs ? 18 : 9,
+          itemStyle: { color: '#00e5ff', borderColor: '#fff', borderWidth: isFs ? 3 : 2 }
         }
       ]
     };
@@ -759,25 +774,25 @@ function renderSingleStockChart(hasStarted, currentStep) {
     backgroundColor: '#000000',
     animation: false,
     grid: [
-      { left: 65, right: 65, top: 25, height: '62%' },
-      { left: 65, right: 65, top: '75%', height: '18%' }
+      { left: isFs ? 110 : 65, right: isFs ? 110 : 65, top: isFs ? 35 : 25, height: '62%' },
+      { left: isFs ? 110 : 65, right: isFs ? 110 : 65, top: '75%', height: '18%' }
     ],
     xAxis: [
       {
         type: 'category',
         data: timeAxis,
         boundaryGap: false,
-        axisLine: { lineStyle: { color: '#333333' } },
+        axisLine: { lineStyle: { color: '#333333', width: isFs ? 2 : 1 } },
         axisTick: {
           show: true,
           interval: (index) => dayStartIndexSet.has(index),
-          lineStyle: { color: '#555555' }
+          lineStyle: { color: '#555555', width: isFs ? 2 : 1 }
         },
         axisLabel: {
           show: true,
           color: '#00e5ff',
           fontFamily: 'JetBrains Mono',
-          fontSize: 13,
+          fontSize: isFs ? 26 : 13,
           fontWeight: 'bold',
           interval: (index) => midIndexSet.has(index),
           // STRICT REQUIREMENT: "動畫圖表的X軸只需要顯示日期即可"
@@ -786,7 +801,7 @@ function renderSingleStockChart(hasStarted, currentStep) {
         splitLine: {
           show: true,
           interval: (index) => dayStartIndexSet.has(index),
-          lineStyle: { color: '#262626', type: 'dashed' }
+          lineStyle: { color: '#262626', type: 'dashed', width: isFs ? 2 : 1 }
         }
       },
       {
@@ -809,10 +824,10 @@ function renderSingleStockChart(hasStarted, currentStep) {
         axisLabel: {
           color: v => Math.abs(v - refClose) < 0.01 ? '#ffff00' : (v > refClose ? '#ff3333' : '#00e600'),
           fontFamily: 'JetBrains Mono',
-          fontSize: 12,
+          fontSize: isFs ? 24 : 12,
           formatter: '{value} 元'
         },
-        splitLine: { lineStyle: { color: '#1c1c1c', type: 'dashed' } }
+        splitLine: { lineStyle: { color: '#1c1c1c', type: 'dashed', width: isFs ? 2 : 1 } }
       },
       {
         type: 'value',
@@ -821,7 +836,7 @@ function renderSingleStockChart(hasStarted, currentStep) {
         axisLabel: {
           color: v => Math.abs(v) < 0.01 ? '#ffff00' : (v > 0 ? '#ff3333' : '#00e600'),
           fontFamily: 'JetBrains Mono',
-          fontSize: 12,
+          fontSize: isFs ? 24 : 12,
           formatter: '{value}%'
         },
         splitLine: { show: false }
@@ -830,7 +845,7 @@ function renderSingleStockChart(hasStarted, currentStep) {
         gridIndex: 1,
         type: 'value',
         splitNumber: 2,
-        axisLabel: { color: '#888', fontFamily: 'JetBrains Mono', fontSize: 10 },
+        axisLabel: { color: '#888', fontFamily: 'JetBrains Mono', fontSize: isFs ? 20 : 10 },
         splitLine: { show: false }
       }
     ],
@@ -841,15 +856,15 @@ function renderSingleStockChart(hasStarted, currentStep) {
         data: priceData,
         smooth: false,
         showSymbol: false,
-        lineStyle: { color: '#00e5ff', width: 2 },
+        lineStyle: { color: '#00e5ff', width: isFs ? 3.5 : 2 },
         markLine: {
           silent: true,
           symbol: 'none',
           data: [
             {
               yAxis: refClose,
-              lineStyle: { color: '#aaaaaa', type: [4, 4], width: 1.5 },
-              label: { show: true, formatter: `昨收 ${refClose} 元`, color: '#ffff00', fontSize: 12 }
+              lineStyle: { color: '#aaaaaa', type: [4, 4], width: isFs ? 2.5 : 1.5 },
+              label: { show: true, formatter: `昨收 ${refClose} 元`, color: '#ffff00', fontSize: isFs ? 24 : 12 }
             }
           ]
         },
@@ -1188,8 +1203,9 @@ function initSlidingRankingRowsDOM() {
   const container = document.getElementById('multiRankingRowsContainer');
   if (!container) return;
 
+  const rowH = getRowHeight();
   container.innerHTML = '';
-  container.style.height = `${state.symbols.length * CONFIG.rowHeight}px`;
+  container.style.height = `${state.symbols.length * rowH}px`;
 
   state.symbols.forEach((sym, idx) => {
     const sData = state.stockDataMap[sym];
@@ -1199,19 +1215,19 @@ function initSlidingRankingRowsDOM() {
     const row = document.createElement('div');
     row.className = 'sz-ranking-row';
     row.id = `sliding_row_${sym}`;
-    row.style.top = `${idx * CONFIG.rowHeight}px`; // Initial position
+    row.style.top = `${idx * rowH}px`; // Initial position
 
     row.innerHTML = `
-      <div style="width: 14%;"><span class="rank-badge">${idx + 1}</span></div>
-      <div style="width: 27%;">
+      <div class="sz-col-rank"><span class="rank-badge">${idx + 1}</span></div>
+      <div class="sz-col-stock">
         <div class="stock-cell-info">
           <span class="stock-dot" style="background:${color};"></span>
           <span class="stock-title-code">${name}<small class="text-gray">${sym}</small></span>
         </div>
       </div>
-      <div style="width: 20%;" class="cell-price text-yellow">--</div>
-      <div style="width: 17%;" class="cell-change text-yellow">--</div>
-      <div style="width: 22%;" class="cell-pct"><span class="return-badge flat">0.00%</span></div>
+      <div class="sz-col-price cell-price text-yellow">--</div>
+      <div class="sz-col-diff cell-change text-yellow">--</div>
+      <div class="sz-col-pct cell-pct"><span class="return-badge flat">0.00%</span></div>
     `;
 
     container.appendChild(row);
@@ -1283,9 +1299,13 @@ function updateLiveRankingTable() {
   });
 
   // Sort descending by stock price (Y軸以股票價格比價)
-  // Day 1 Open: 6462 (97.8) > 6756 (96.6) > 4968 (92.3) > 6104 (91.6) > 8150 (89.7, Rank 5 最後一名!)
-  // Day 5 Close: 8150 (112.0, Rank 1 第一名!) > 6462 (99.7) > 6756 (97.5) > 4968 (92.5) > 6104 (90.0)
   rankingList.sort((a, b) => b.price - a.price);
+
+  const rowH = getRowHeight();
+  const container = document.getElementById('multiRankingRowsContainer');
+  if (container) {
+    container.style.height = `${state.symbols.length * rowH}px`;
+  }
 
   // Position and update each row smoothly
   rankingList.forEach((item, rankIndex) => {
@@ -1293,7 +1313,7 @@ function updateLiveRankingTable() {
     if (!row) return;
 
     // 1. Smooth Up/Down Sliding via CSS transition on top:
-    const targetTop = rankIndex * CONFIG.rowHeight;
+    const targetTop = rankIndex * rowH;
     row.style.top = `${targetTop}px`;
 
     // 2. Rank Badge (第一名無皇冠圖片，純金屬質感大字徽章)
@@ -1311,11 +1331,11 @@ function updateLiveRankingTable() {
     const badgeType = isUp ? 'up' : isDown ? 'down' : 'flat';
 
     const priceEl = row.querySelector('.cell-price');
-    priceEl.className = `cell-price ${colorClass}`;
+    priceEl.className = `sz-col-price cell-price ${colorClass}`;
     priceEl.textContent = `${Number(item.price).toFixed(1)}元`;
 
     const changeEl = row.querySelector('.cell-change');
-    changeEl.className = `cell-change ${colorClass}`;
+    changeEl.className = `sz-col-diff cell-change ${colorClass}`;
     changeEl.textContent = `${sign}${item.change}`;
 
     const pctEl = row.querySelector('.return-badge');
@@ -1435,7 +1455,7 @@ function showFinalRankingModal() {
     const col = isUp ? '#ff3333' : '#00e600';
     banner.innerHTML = `
       <div class="champion-text">💐 捧花得主：${champ.name} (${champ.symbol}) 💐</div>
-      <div class="champion-sub">5日收盤：<strong style="color:${col};font-size:20px;">${Number(champ.price).toFixed(1)} 元</strong> (${champ.change >= 0 ? '+' : ''}${champ.change} / ${champ.changePct.toFixed(2)}%)</div>
+      <div class="champion-sub">5日收盤：<strong style="color:${col};" class="champion-price">${Number(champ.price).toFixed(1)} 元</strong> (${champ.change >= 0 ? '+' : ''}${champ.change} / ${champ.changePct.toFixed(2)}%)</div>
     `;
   }
 
@@ -1450,7 +1470,7 @@ function showFinalRankingModal() {
 
     rowsHtml += `
       <tr>
-        <td><strong style="font-size:16px;color:${rank === 1 ? '#fbbf24' : '#ccc'};">#${rank}</strong></td>
+        <td><strong class="final-rank-num" style="color:${rank === 1 ? '#fbbf24' : '#ccc'};">#${rank}</strong></td>
         <td>
           <span class="stock-dot" style="display:inline-block;background:${item.color};margin-right:6px;"></span>
           <strong>${item.name}</strong> <small class="stock-modal-code">${item.symbol}</small>
@@ -1692,7 +1712,7 @@ function switchMode(mode, singleSym = null) {
   setTimeout(() => sanzhuChartInstance?.resize(), 50);
 }
 
-// Fullscreen Controller (全螢幕按鈕保留icon就好)
+// Fullscreen Controller (全螢幕按鈕保留icon就好，字體放大兩倍)
 function toggleFullscreen(forceState = null) {
   const isFs = forceState !== null ? forceState : !state.isFullscreen;
   state.isFullscreen = isFs;
@@ -1703,19 +1723,30 @@ function toggleFullscreen(forceState = null) {
   const text = document.getElementById('fullscreenText');
 
   if (isFs) {
-    if (document.documentElement.requestFullscreen) {
+    if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
     }
     if (icon) icon.className = 'fa-solid fa-compress';
     if (text) text.textContent = '退出';
-    showToast('已進入純淨全螢幕比價模式', 'info');
+    showToast('已進入全螢幕大字體比價模式（字體放大 2 倍）', 'info');
   } else {
     if (document.exitFullscreen && document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
     if (icon) icon.className = 'fa-solid fa-expand';
     if (text) text.textContent = '全螢幕';
+    showToast('已退出全螢幕模式（恢復標準字體）', 'info');
   }
+
+  // Update sliding ranking rows layout (adjust row heights: 124px vs 62px)
+  const container = document.getElementById('multiRankingRowsContainer');
+  if (container) {
+    container.style.height = `${state.symbols.length * getRowHeight()}px`;
+  }
+  updateRightTable();
+
+  // Re-render chart with updated font sizes (2x in fullscreen)
+  initOrUpdateChart();
 
   setTimeout(() => sanzhuChartInstance?.resize(), 100);
 }
@@ -1877,7 +1908,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ESC Key Listener
+  // ESC / F11 Key Listener
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (!document.getElementById('finalRankingModal').classList.contains('hidden')) {
@@ -1885,6 +1916,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (state.isFullscreen) {
         toggleFullscreen(false);
       }
+    } else if (e.key === 'F11') {
+      e.preventDefault();
+      toggleFullscreen();
     }
   });
 
