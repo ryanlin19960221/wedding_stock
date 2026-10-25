@@ -33,9 +33,9 @@ const state = {
   viewMode: 'multi', // 'multi' (多股同台比價) | 'single' (個股分時明細)
   isFullscreen: false,
   
-  // 預設 100 元左右半導體指標股 (8150 南茂 由第5名最後一名逆轉至第1名)
-  symbols: ['8150', '6462', '6756', '4968', '6104'],
-  selectedSingleSymbol: '8150',
+  // 預設五檔股票 (0050, 2317, 2882, 0052, 2301)
+  symbols: ['0050', '2317', '2882', '0052', '2301'],
+  selectedSingleSymbol: '0050',
   nDays: 5,
   
   stockDataMap: {},
@@ -130,15 +130,19 @@ async function fetchFugleApi(endpoint) {
 }
 
 // ===================================================================
-// 100元半導體標的與「最後一名逆轉第一名」精選黑馬
-// "預設股票為100元左右的半導體相關股票，其中一支盡可能挑選可以從最後一名變成第一名的股票"
+// 預設五檔股票與選股設定 (0050, 2317, 2882, 0052, 2301)
 // ===================================================================
 const CANDIDATE_SYMBOLS = [
-  '8150',  // 南茂 (半導體封測：Day 1 早盤 89.7 元最後一名 -> 逐日飆漲至 112.0 元勇奪第1名捧花冠軍！+24.86%)
-  '6462',  // 神盾 (半導體指紋與AI晶片IC設計：97.8 元 -> 99.7 元)
-  '6756',  // 威鋒電子 (USB Type-C 控制晶片IC設計：96.6 元 -> 97.5 元)
-  '4968',  // 立積 (射頻前端RF IC設計：92.3 元 -> 92.5 元)
-  '6104',  // 創惟 (USB高速傳輸IC設計：91.6 元 -> 90.0 元)
+  '0050',  // 元大台灣50
+  '2317',  // 鴻海
+  '2882',  // 國泰金
+  '0052',  // 富邦科技
+  '2301',  // 光寶科
+  '8150',  // 南茂
+  '6462',  // 神盾
+  '6756',  // 威鋒電子
+  '4968',  // 立積
+  '6104',  // 創惟
   '2454',  // 聯發科
   '2330',  // 台積電
   '00891', // 中信關鍵半導體 ETF
@@ -147,23 +151,17 @@ const CANDIDATE_SYMBOLS = [
 ];
 
 async function detectAndSelectComebackSemiconductorStocks() {
-  showChartLoader(true, '🔍 正在載入100元半導體精選標的 (挑選最後一名逆轉第1名黑馬)...');
+  showChartLoader(true, '🔍 正在載入預設股票 (0050, 2317, 2882, 0052, 2301)...');
 
-  // 精選 100 元左右半導體指標股黃金組合：
-  // 1. 8150 南茂：開盤價 89.7 元 (落居第 5 名，最後一名！)，隨後狂飆超車，第5日收盤 112.0 元 (勇奪第 1 名冠軍捧花！+24.86%)
-  // 2. 6462 神盾：IC設計 (97.8 元 -> 99.7 元)
-  // 3. 6756 威鋒電子：USB Type-C IC設計 (96.6 元 -> 97.5 元)
-  // 4. 4968 立積：射頻前端IC設計 (92.3 元 -> 92.5 元)
-  // 5. 6104 創惟：高速傳輸IC設計 (91.6 元 -> 90.0 元)
-  state.symbols = ['8150', '6462', '6756', '4968', '6104'];
-  state.selectedSingleSymbol = '8150';
+  state.symbols = ['0050', '2317', '2882', '0052', '2301'];
+  state.selectedSingleSymbol = '0050';
 
   const filterBadge = document.getElementById('strategyFilterBadge');
   if (filterBadge) {
-    filterBadge.innerHTML = `<i class="fa-solid fa-microchip"></i> 100元半導體爭霸：南茂(8150 最後逆轉奪冠)、神盾、威鋒電子、立積、創惟`;
+    filterBadge.innerHTML = `<i class="fa-solid fa-layer-group"></i> 預設指標股：元大台灣50(0050)、鴻海(2317)、國泰金(2882)、富邦科技(0052)、光寶科(2301)`;
   }
 
-  showToast('💐 已載入100元半導體精選標的！黑馬南茂(8150)由最後一名(89.7元)狂飆奪冠(112.0元)！', 'info');
+  showToast('💐 已載入預設股票：0050、2317、2882、0052、2301', 'info');
 }
 
 // 輔助函式：計算 X 軸僅顯示日期所需的日中點刻度與換日分隔點
@@ -374,13 +372,14 @@ async function loadAllStocksData() {
 
 function getFallbackStockName(symbol) {
   const map = {
+    '0050': '元大台灣50', '2317': '鴻海', '2882': '國泰金', '0052': '富邦科技', '2301': '光寶科',
     '8150': '南茂', '6462': '神盾', '6756': '威鋒電子', '4968': '立積', '6104': '創惟',
     '2454': '聯發科', '2330': '台積電', '00891': '中信關鍵半導體', '00927': '群益半導體收益', '2303': '聯電',
     '3711': '日月光投控', '2449': '京元電子', '6488': '環球晶', '5347': '世界', '3105': '穩懋',
-    '3034': '聯詠', '2379': '瑞昱', '00892': '富邦台灣半導體', '00904': '新光臺灣半導體30', '0052': '富邦科技',
+    '3034': '聯詠', '2379': '瑞昱', '00892': '富邦台灣半導體', '00904': '新光臺灣半導體30',
     '1514': '亞力', '6176': '瑞儀', '9958': '世紀鋼', '2385': '群光', '4904': '遠傳',
-    '2347': '聯強', '4938': '和碩', '0050': '元大台灣50', '5871': '中租-KY', '3702': '大聯大',
-    '2317': '鴻海', '2382': '廣達', '2603': '長榮', '3231': '緯創', '6669': '緯穎',
+    '2347': '聯強', '4938': '和碩', '5871': '中租-KY', '3702': '大聯大',
+    '2382': '廣達', '2603': '長榮', '3231': '緯創', '6669': '緯穎',
     '2376': '技嘉', '2308': '台達電', '3008': '大立光', '0056': '元大高股息', '00878': '國泰永續高股息'
   };
   return map[symbol] || symbol;
@@ -388,6 +387,7 @@ function getFallbackStockName(symbol) {
 
 function generateRealistic1mCandles(symbol, nDays) {
   const basePrices = {
+    '0050': 195.0, '2317': 215.0, '2882': 68.5, '0052': 192.0, '2301': 106.0,
     '8150': 89.7, '6462': 97.8, '6756': 96.6, '4968': 92.3, '6104': 91.6,
     '2454': 1480, '2330': 1040, '00891': 20.5, '00927': 21.2, '2303': 51.5
   };
@@ -410,14 +410,17 @@ function generateRealistic1mCandles(symbol, nDays) {
     const dateStr = targetDate.toISOString().split('T')[0];
 
     timeSlots.forEach((timeStr, tIdx) => {
-      // 南茂 (8150)：開盤 89.7 元 (第5名最後一名)，隨後一路狂飆至 112.0 元奪得第1名
       let drift = 0;
-      if (symbol === '8150') {
-        drift = 0.00018;
-      } else if (symbol === '6104') {
-        drift = -0.00003;
-      } else if (symbol === '6462') {
-        drift = 0.00003;
+      if (symbol === '2317') {
+        drift = 0.00012;
+      } else if (symbol === '0050') {
+        drift = 0.00008;
+      } else if (symbol === '0052') {
+        drift = 0.00010;
+      } else if (symbol === '2882') {
+        drift = -0.00002;
+      } else if (symbol === '2301') {
+        drift = 0.00005;
       }
 
       const change = +( (Math.random() - 0.49 + drift) * (currentPrice * 0.0016) ).toFixed(2);
@@ -487,13 +490,15 @@ function renderMultiStockChart(hasStarted, currentStep) {
   });
 
   if (!isFinite(globalMin)) {
-    globalMin = 85;
-    globalMax = 115;
+    globalMin = 50;
+    globalMax = 250;
   }
 
   // Dynamic Y-axis rounded to nearest 5 TWD
-  const yMin = Math.max(50, Math.floor((globalMin - 2) / 5) * 5);
+  const yMin = Math.max(0, Math.floor((globalMin - 2) / 5) * 5);
   const yMax = Math.ceil((globalMax + 3) / 5) * 5;
+  const priceRange = yMax - yMin;
+  const yInterval = priceRange > 120 ? 25 : (priceRange > 60 ? 10 : 5);
 
   state.symbols.forEach((sym, idx) => {
     const sData = state.stockDataMap[sym];
@@ -650,7 +655,7 @@ function renderMultiStockChart(hasStarted, currentStep) {
       type: 'value',
       min: yMin,
       max: yMax,
-      interval: 5,
+      interval: yInterval,
       axisLabel: {
         color: '#00e5ff',
         fontFamily: 'JetBrains Mono',
@@ -664,7 +669,7 @@ function renderMultiStockChart(hasStarted, currentStep) {
       }
     },
     series: [
-      {
+      ...(yMin <= 100 && 100 <= yMax ? [{
         type: 'line',
         markLine: {
           silent: true,
@@ -690,7 +695,7 @@ function renderMultiStockChart(hasStarted, currentStep) {
             }
           ]
         }
-      },
+      }] : []),
       ...seriesList
     ]
   };
@@ -1518,6 +1523,18 @@ function updateTopQuoteStrip(candle, targetSym = null) {
   symbolEl.textContent = sym;
   nameEl.textContent = ticker?.name || getFallbackStockName(sym);
 
+  const marketEl = document.getElementById('quoteMarket');
+  if (marketEl) {
+    const marketMap = {
+      '0050': '上市 ETF',
+      '2317': '上市其他電子',
+      '2882': '上市金融保險',
+      '0052': '上市 ETF',
+      '2301': '上市電腦週邊'
+    };
+    marketEl.textContent = ticker?.industry || marketMap[sym] || '上市股票';
+  }
+
   const refClose = ticker?.previousClose || currentData?.candles10m[0]?.refPrice || 100;
   prevCloseEl.textContent = refClose;
 
@@ -1698,7 +1715,7 @@ function addStock(symbol) {
   symbol = symbol.trim().toUpperCase();
   if (!symbol) return;
   if (!/^[0-9A-Z]{4,6}$/.test(symbol)) {
-    showToast('請輸入正確的台股代號 (如 8150, 6462)', 'error');
+    showToast('請輸入正確的台股代號 (如 0050, 2317)', 'error');
     return;
   }
   if (state.symbols.includes(symbol)) {
